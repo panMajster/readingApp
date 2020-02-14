@@ -2,8 +2,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -22,8 +26,9 @@ public class Edytor extends JPanel {
 	static JButton dodajKsiazke;
 	static JButton dodajPytanie;
 	static JButton wyczysc;
-	
 	static JButton zapiszKsiazke;
+	
+	static JButton wczytajKsiazke;
 	
 	JTextField tytulKsiazki;
 	JTextField pytanie;
@@ -37,10 +42,10 @@ public class Edytor extends JPanel {
 	
 	ArrayList<KsiazkaPytania> ksiazki;
 	
-	ArrayList<String> pytania;
+	static ArrayList<String> pytania;
 	String tytul;
 	
-
+	static KsiazkaPytania ksiazka;
 	
 	public Edytor() {
 		
@@ -51,8 +56,13 @@ public class Edytor extends JPanel {
 		tytul = new String();
 		
 		zapiszKsiazke = new JButton ("Zapisz książkę");
-		zapiszKsiazke.setBounds(169, 227, 156, 25);
+		zapiszKsiazke.setBounds(128, 227, 156, 25);
 		zapiszKsiazke.addActionListener(new ZapiszKsiazkeListener());
+		
+		wczytajKsiazke = new JButton ("Wczytaj");
+		wczytajKsiazke.setBounds(296, 227, 123, 25);
+		wczytajKsiazke.addActionListener(new WczytajListener());
+		
 		
 		
 		displayTytul = new JLabel();
@@ -86,7 +96,7 @@ public class Edytor extends JPanel {
 		dodajPytanie.addActionListener(new dodajPytanieListener());
 		
 		wyczysc = new JButton ("Wyczyść");
-		wyczysc.setBounds(44, 227, 94, 25);
+		wyczysc.setBounds(22, 227, 94, 25);
 		wyczysc.addActionListener(new WyczyscListener());
 		
 		
@@ -102,6 +112,7 @@ public class Edytor extends JPanel {
 		
 		add(wyczysc);
 		add(zapiszKsiazke);
+		add(wczytajKsiazke);
 		
 		JLabel lblDodanePytania = new JLabel("Dodane pytania");
 		lblDodanePytania.setBounds(10, 72, 123, 15);
@@ -125,17 +136,39 @@ public class Edytor extends JPanel {
 	
 	class dodajPytanieListener implements ActionListener {
 		public void actionPerformed (ActionEvent click) {
-			pytania.add(pytanie.getText());
-			System.out.println(pytania);
-			pytanie.setText("");
 			
-			String gotowePytania = "";
-			
-			for (int i = 0 ; i < pytania.size() ; i ++) {
-				gotowePytania += i+". "+ pytania.get(i) + "\n ";
+			if (tytulKsiazki.getText().isEmpty() == false) {
+				if (pytanie.getText().isEmpty() == false) {
+					pytania.add(pytanie.getText());	
+				}
+				
+				else {
+					System.out.println("Nie można dodać pustego pola");
+				}
+				
+				
+					
+				
+				System.out.println(pytania);
+				pytanie.setText("");
+				
+				String gotowePytania = "";
+				
+				
+				
+				for (int i = 0 ; i < pytania.size() ; i ++) {
+					gotowePytania += i+". "+ pytania.get(i) + "\n ";
+				}
+				
+				
+				pytaniaArea.setText("Lista pytań: \n");
+				pytaniaArea.setText(gotowePytania);
 			}
-			pytaniaArea.setText("Lista pytań: \n");
-			pytaniaArea.setText(gotowePytania);
+			
+			else {
+				tytulKsiazki.setText("Wprowadz tytul");
+			}
+		
 			
 		}
 	}
@@ -146,19 +179,19 @@ public class Edytor extends JPanel {
 			pytania.removeAll(pytania);
 			ksiazki.removeAll(ksiazki);
 			tytulKsiazki.setEditable(true);
+			tytulKsiazki.setText("");
 			pytaniaArea.setText("Wyczyszczono");
 		}
 	}
 	
 	class ZapiszKsiazkeListener implements ActionListener {
 		public void actionPerformed (ActionEvent click) {
-			KsiazkaPytania ksiazka = new KsiazkaPytania(tytul, pytania);
-			
-			ksiazki.add(ksiazka);
-			
+			ksiazka = new KsiazkaPytania(tytul, pytania);
+							
 			
 			JFileChooser plikDanych = new JFileChooser();
-			plikDanych.showSaveDialog(GUI.ramka);
+			
+						plikDanych.showSaveDialog(GUI.ramka);
 			zapiszPlik(plikDanych.getSelectedFile());
 			
 			
@@ -167,20 +200,46 @@ public class Edytor extends JPanel {
 	
 	private void zapiszPlik (File plik) {
 		try {
-			BufferedWriter pisarz = new BufferedWriter(new FileWriter(plik));
-			
-			for (KsiazkaPytania ksiazka : ksiazki) {
-				pisarz.write(ksiazka.getTytul() + "/\n");
-				pisarz.write(ksiazka.getPytania() + "\n");
-				
-			}
-			pisarz.close();
+			ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(plik));
+			os.writeObject(ksiazka);
+			os.close();	
+					
 			
 		}catch (IOException ex) {
 			System.out.println ("Błąd w zapisie");
 			ex.printStackTrace();
 			
 			
+		}
+	}
+	
+	class WczytajListener implements  ActionListener {
+		public void actionPerformed (ActionEvent click) {
+			
+									
+			JFileChooser plikDanych = new JFileChooser();
+			plikDanych.showOpenDialog(GUI.ramka);
+			wczytajPlik(plikDanych.getSelectedFile());
+			
+			tytulKsiazki.setText(ksiazka.getTytul());
+			tytulKsiazki.setEditable(false);
+			pytaniaArea.setText(ksiazka.getPytania());
+			
+			tytulKsiazki.setEditable(false);
+			
+			pytania = ksiazka.zwroclistePytan();
+		}
+	}
+	
+	private void wczytajPlik(File plik) {
+		try {
+			
+			ObjectInputStream is = new ObjectInputStream(new FileInputStream(plik));
+			ksiazka = (KsiazkaPytania) is.readObject();
+			is.close();
+			
+		}catch (Exception ex) {
+			ex.printStackTrace();
 		}
 	}
 }

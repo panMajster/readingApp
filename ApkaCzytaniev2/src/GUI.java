@@ -10,13 +10,13 @@
 */
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import java.util.Observer;
 
 import javax.swing.*;
 
 	
 
-public class GUI {
+public class GUI   {
 	static JFrame ramka;
 	
 	
@@ -90,11 +90,17 @@ public class GUI {
 		Edytor edytorPytan = new Edytor();
 		
 		
+		//////////////// PRZERWA
+		
+		PanelPrzerwa przerwa = new PanelPrzerwa();
+		
+		
 		
 		panelZakladki.addTab("Wybierz Ksiązke", panelWybor);
 		panelZakladki.addTab("Quiz", quiz);
 		panelZakladki.addTab("Edytor", edytorPytan);
 		panelZakladki.addTab("Stoper", stoper);
+		panelZakladki.addTab("Przerwa", przerwa);
 	
 		
 		

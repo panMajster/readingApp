@@ -8,6 +8,7 @@ import java.util.TimerTask;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
@@ -21,6 +22,7 @@ public class PanelStoper extends JPanel {
 	static JButton stop;
 	static JButton reset;
 	static JLabel display;
+	static JOptionPane pytania; 
 	
 	JTextField minuty;
 	JTextField sekundy;
@@ -102,7 +104,14 @@ public class PanelStoper extends JPanel {
 						timer.cancel();
 						display.setText("Koniec");
 						
-						;
+						pytania = new JOptionPane();
+						JOptionPane.showMessageDialog(display,
+						
+						"1. O czym przeczytałem?\n" +
+						"2. Jakie są nowe koncepty?\n" +
+						"3. Jak mogę zaraz ich użyć?"
+								
+								);
 					}
 					
 					
